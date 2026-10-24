@@ -828,3 +828,9 @@
 - The `dsh-compaction-instant` web client uses `configForms` instead of the removed `settingsScope`, so the page no longer stops on Failed to load plugins.
 - Rewind on 0.1.7 created the new session and left the UI on the old chat, so the click looked dead. 0.1.7 has no `sessions.open`. The button now opens the new session with `uiWorkspace.openSession` and puts the previous user line back in the composer. A failure shows on the button.
 - The README sponsor block is now a non-profit notice: no commercial resale and no gray-market profit; technical reference only.
+
+# 1.1.72-dsh021rc2.5（源码提交，尚未打包安装）
+
+- 从原作者 `YuJunZhiXue/dsh-purge` 的 `ac58b3e`（1.1.77）选择性移植证据账本与未决问题的 8 个工具，给 0.2.1-rc.2 工具 schema 补齐 `additionalProperties`。
+- 修复红队预设重复插入 `dsh-purge` 导致的 already queued，以及 Windows 换包助手可能被自身停止流程杀掉的问题。
+- 保留本地现有的使用范围、Skill、POC/EXP 知识库、提示词和安全加固行为。已安装的 `.4` 包未更改。
