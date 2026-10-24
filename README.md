@@ -1,6 +1,6 @@
 # dsh-purge · DSH 0.2.1-rc.2 适配版
 
-> **上游已经停更，这个仓库接着把它跑在 DeepSeek Harness 0.2.1-rc.2 上。**
+> **上游已经被请喝茶，这个仓库接着把它跑在 DeepSeek Harness 0.2.1-rc.2 上。**
 >
 > 原项目 [YuJunZhiXue/dsh-purge](https://github.com/YuJunZhiXue/dsh-purge) 在 2026-10 挂出「暂时停更」：不发新版、不处理 issue/PR、新版 dsh 也不保证跟上。最后一个正式版是 `v1.1.71`，master 上的 `1.1.72` 从未发版。
 >
