@@ -18,16 +18,34 @@ fs.writeFileSync(noexec, "#!/bin/sh\n", { mode: 0o644 });
 const py = path.join(root, "httpx");
 fs.writeFileSync(py, "#!/usr/bin/env python3\nprint(1)\n", { mode: 0o755 });
 
+await check("recon pipeline's naabu is in the environment catalog", () => {
+  assert.ok(pc.TOOL_CATALOG.some((tool) => tool.id === "naabu"));
+});
+
 await check("config rejects directory / non-executable", () => {
   pc.savePlatformConfig({ tools: { nmap: root }, envAdaptSkip: false }, root + "/dir");
   assert.equal(pc.resolveTool("nmap", { root: root + "/dir" }).path, null);
   pc.savePlatformConfig({ tools: { nmap: noexec }, envAdaptSkip: false }, root + "/nx");
-  assert.equal(pc.resolveTool("nmap", { root: root + "/nx" }).path, null);
+  // Windows ignores POSIX mode bits in X_OK checks.
+  if (process.platform !== "win32") {
+    assert.equal(pc.resolveTool("nmap", { root: root + "/nx" }).path, null);
+  }
 });
 
 await check("config rejects Python httpx", () => {
   pc.savePlatformConfig({ tools: { httpx: py } }, root + "/py");
   assert.equal(pc.resolveTool("httpx", { root: root + "/py" }).path, null);
+});
+
+await check("PATH rejects Windows Python httpx launcher", () => {
+  const scripts = path.join(root, "Python311", "Scripts");
+  fs.mkdirSync(scripts, { recursive: true });
+  fs.writeFileSync(path.join(scripts, "httpx.exe"),
+    Buffer.from("MZ" + "\0".repeat(128) + "python.exe\0PK__main__.py", "latin1"),
+    { mode: 0o755 });
+  assert.equal(pc.resolveTool("httpx", {
+    root: root + "/win-py", env: { PATH: scripts },
+  }).path, null);
 });
 
 await check("executable absolute path resolves", () => {
@@ -40,7 +58,8 @@ await check("executable absolute path resolves", () => {
 await check("config file is 0600", () => {
   pc.savePlatformConfig({ notes: "x" }, root + "/perm");
   const st = fs.statSync(path.join(root + "/perm", "config.json"));
-  assert.equal(st.mode & 0o777, 0o600);
+  if (process.platform !== "win32") assert.equal(st.mode & 0o777, 0o600);
+  else assert.ok(st.isFile());
 });
 
 await check("empty env does not clobber, clearEnv does", () => {
