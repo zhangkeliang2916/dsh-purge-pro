@@ -1,129 +1,104 @@
-## 关于 dsh-purge Pro
-dsh-purge Pro 基于原作者 YuJunZhiXue/dsh-purge 的早期源码 fork，由社区独立维护。原作者后续公开版收紧了红队任务的使用范围，不再随包提供红队 Skill 和知识库。本分支保留了早期功能，并继续完善 DSH 0.2.1-rc.2 兼容性、Windows 桌面安装、Kali SSH 环境适配及证据与报告流程。
-这是独立维护的 Pro 分支，感谢原作者的基础工作。原版仍在更新；后续修复会核对后按需移植。
->
-> 本仓库以 **1.1.72（master）** 为基座，把 0.2.1-rc.2 上必崩的几处修掉，做成可直接安装的版本。**上游恢复维护后，请优先回到上游。**
+# dsh-purge Pro
 
-- 版本：`1.1.72-dsh021rc2.4`
-- 适配：`@deepseek-ai/dsh` / `dsh-base` **0.2.1-rc.2**（web profile，macOS 实测）
-- 基线：0.2.0-rc.2 仍可用（本版改动对 0.2.0 是向后兼容的）
-- 许可：MIT（原作者 小杨 / YuJunZhiXue，署名见文末）
+基于 [YuJunZhiXue/dsh-purge](https://github.com/YuJunZhiXue/dsh-purge) 早期源码的独立维护分支。感谢原作者小杨的基础工作。本分支面向 DSH `0.2.1-rc.2`，继续维护清洗补丁、红队演练台、Windows Desktop 安装和 Kali SSH 环境适配，并按需移植原版后续改进。
 
-## 为什么需要这一版
+| 项目 | 当前状态 |
+| --- | --- |
+| 插件版本 | `1.1.72-dsh021rc2.10` |
+| 适配宿主 | DSH `0.2.1-rc.2` |
+| 主要验证环境 | Windows Desktop profile；Kali SSH 环境适配已验证 |
+| 许可 | MIT；保留原作者署名及许可证 |
 
-0.2.1 改了提示词变量的注册范围：agent-loop 只注册 `provider` / `model`，**不再注册 `cwd`**。而 1.1.72 的 `lib/identity.js` 会无条件把 `deployment:persona-suffix` 换成 `Your working directory is {{cwd}}.`。结果是**每一轮对话在发出模型请求之前**就抛：
+本仓库与原作者当前公开版是两条独立维护路线。原作者公开版调整了红队使用范围及随包内容；本分支保留早期红队能力，并增加适配、证据与报告功能。请仅在获得授权的环境中使用。
 
-```
-unknown prompt variable "[cwd]" in section "deployment:persona-suffix";
-registered variables: provider, model
-```
+## 功能与特点
 
-补丁面板这时是全绿的，因为崩点在提示词组装，不在补丁。
+- **清洗与宿主兼容**：修复 DSH `0.2.1-rc.2` 的提示词变量、补丁锚点、桌面重启及备份问题；面板可查看补丁状态并执行应用、还原。
+- **红队演练台**：包含资产、端口、指纹、漏洞、当前测试、发现时间、得分目标、报告等视图；提供 64 个 `redteam_*` 工具声明及 23 份红队 Skill 文档。POC/EXP 知识库可检索和回填。
+- **证据链与报告**：记录原始 HTTP 请求、攻击步骤、工具结果、截图和得分；报告可按目标导出，截图随报告一起复制并使用相对路径引用。
+- **Windows + Kali SSH**：Windows Desktop 可登记远端 Kali 主机，环境适配页检查工具与配置。Linux 工具仍需安装在 Kali，远端命令经 SSH 执行；仅连接 Kali 不代表扫描流程已验证。
+- **安装自修复**：安装脚本可补齐 Desktop profile 的插件 bundle 注册和 `cordis.patch.yml` 插入项，减少“包已安装但界面没有入口”的情况。
 
-## 修了什么
+红队演练台是记录和协调工具，不会因为安装插件就自动具备全部外部工具、FOFA 凭据或 VPS。使用前应先完成“演练台 → 环境适配”的检查，再在有授权的靶场中建立目标和会话。
 
-对应上游 issue：[#114](https://github.com/YuJunZhiXue/dsh-purge/issues/114)、[#126](https://github.com/YuJunZhiXue/dsh-purge/issues/126)、[#136](https://github.com/YuJunZhiXue/dsh-purge/issues/136)、[#132](https://github.com/YuJunZhiXue/dsh-purge/issues/132)、[#119](https://github.com/YuJunZhiXue/dsh-purge/issues/119)、[#127](https://github.com/YuJunZhiXue/dsh-purge/issues/127)、[#121](https://github.com/YuJunZhiXue/dsh-purge/issues/121)。
+## DSH 0.2.1-rc.2 适配
 
-| 问题 | 根因 | 修法 |
-|---|---|---|
-| **#114 / #126 / #136** 每轮 `unknown prompt variable "{{cwd}}"` | 0.2.1 不再注册 `cwd` 变量，`identity.js` 却硬写 `{{cwd}}` | `lib/identity.js` 增加能力探测：`assembled.variables` 没有 `cwd` 就降级为静态文案 `Your working directory is the current workspace.`；组装末尾再兜底把任何残留 `{{cwd}}` 落成字面量。可用 `DSH_PURGE_CWD=variable\|static` 强制 |
-| 同一 bug 的第二入口 | 插件自己的 `cordis.patch.yml` 里也写着 `personaSuffix: ... {{cwd}}.` | 改成 `personaSuffix: ""`，后缀统一由 identity 层决定 |
-| **#132** 应用后「清洗没有写进全部宿主，已取消重启」、`#40` 落成 skipped | 0.2.1 的 `system-prompt` 在 assemble 后新增 `requiredContexts` 过滤，旧 pattern 全不命中 | patch `#40` 增加 0.2.1 形状的 pattern + replacement，保留 `requiredContexts` 语义 |
-| **#119** 桌面端点「应用」后 `dsh: fatal load failure` | `desktop.js` 同步函数调 async `atomicCopyFile()` 没 `await`，Node 24 升级成 uncaughtException | 函数改 async、补 `await`，`core.js` / `index.js` 调用点同步 |
-| **#127 / #106** 应用后一份 `.bak` 都没有，还原/卸载失效 | `HOST_SYNC` 白名单漏 `closeSync` → `hostFs.closeSync` 未定义 → 占位句柄泄漏 → EPERM 静默失败 | 白名单补 `closeSync / fsyncSync / truncateSync / writeSync / futimesSync / utimesSync` |
-| **#121** Ctrl+Enter 插话静默失效 | 1.1.71 的 `#86` 把 `case "steer"` 改成 `followup`，与 `steer()` 的 next-step 冲突 | 1.1.72 已修正为 `agent.steer`；本版在真机确认落盘 |
-| 红队预设注册失败（社区 fork 的修法） | `presets/redteam/agent.cordis.yml` 的 `toolFilter.deny` 列了未注册的 `workflow / ralph`，`tools.restrict()` 直接抛 `unknown global tool` | 移除 `toolFilter`，子代理隔离改由 `maxDepth: 1` 保证 |
+这版宿主的 agent-loop 不再注册 `cwd` 提示词变量。旧版插件仍写入 `{{cwd}}`，会在模型请求前报 `unknown prompt variable "[cwd]"`，即使补丁面板显示正常。本分支在 `lib/identity.js` 中探测变量能力并降级为静态文案，同时修复了下列问题：
 
-**未处理**：上游 #133（Windows 桌面换包助手杀自己）属 Electron/Windows 路径，macOS 不复现，未改动；上游 #30（system section 过滤影响项目约定）属行为争议，不在适配范围。
+| 问题 | 修复 |
+| --- | --- |
+| `#114 / #126 / #136`：`{{cwd}}` 导致每轮对话失败 | 按宿主已注册变量选择动态或静态工作目录文案，并清理残留占位符 |
+| `#132`：补丁 `#40` 在新版宿主跳过 | 增加匹配新版 `system-prompt` 结构的锚点，保留 `requiredContexts` 语义 |
+| `#119`：桌面应用后加载失败 | 等待异步文件复制完成后再重启 |
+| `#127 / #106`：备份文件缺失、还原失败 | 补齐宿主文件系统接口中的同步操作 |
+| 红队预设注册失败 | 修正预设的工具过滤配置 |
+| Windows Desktop 插件入口缺失 | 安装后检查并补齐 profile bundle 与 body 插入项 |
 
-## 安装
+修复细节与历史记录见 [CHANGELOG.md](CHANGELOG.md)。宿主升级后，应先核对新版宿主版本和补丁锚点，再测试、修复并重新打包；不要直接把适配 `0.2.1-rc.2` 的包当作新版兼容包。
 
-### 方式一：一键脚本（macOS，web profile）
+## 安装与更新
 
-```sh
-curl -fsSL https://raw.githubusercontent.com/evilevil/dsh-purge-021rc2/main/scripts/install.sh | sh
-```
+从本仓库源码打包安装当前版本。源码目录与 DSH profile 内的已安装副本互相独立，修改源码不会自动更新已安装插件。
 
-脚本会：备份现有插件目录 → 解包本仓库发行版 → 写入 `installed-rev` / `applied.json` 戳（避免启动时误判版本落后而反复重打）。
+```powershell
+# 在本仓库目录执行；将安装包保存在 DSH 的插件归档目录
+npm pack
+$archive = Join-Path $env:USERPROFILE '.dsh\plugins\archives'
+New-Item -ItemType Directory -Force $archive | Out-Null
+Copy-Item .\dsh-purge-1.1.72-dsh021rc2.10.tgz $archive -Force
+$packagePath = (Join-Path $archive 'dsh-purge-1.1.72-dsh021rc2.10.tgz').Replace('\', '/')
 
-### 方式二：手动
-
-```sh
-V=1.1.72-dsh021rc2.4
-curl -fsSLO https://github.com/evilevil/dsh-purge-021rc2/releases/download/v$V/dsh-purge-$V.tgz
-curl -fsSLO https://github.com/evilevil/dsh-purge-021rc2/releases/download/v$V/SHA256SUMS.txt
-shasum -a 256 -c SHA256SUMS.txt
-rm -rf "$DSH_HOME/profiles/web/node_modules/dsh-purge"
-mkdir -p "$DSH_HOME/profiles/web/node_modules/dsh-purge"
-tar xzf dsh-purge-$V.tgz -C "$DSH_HOME/profiles/web/node_modules/dsh-purge" --strip-components=1
+# 切换到 DSH Desktop profile 后安装
+Set-Location (Join-Path $env:USERPROFILE '.dsh\profiles\desktop')
+pnpm add "file:$packagePath"
 ```
 
-### 方式三：写进 profile 依赖
+如包管理器禁用了依赖的安装脚本，应在 profile 中允许 `dsh-purge` 的 `postinstall`，或从 profile 目录手动执行：
 
-```json
-"dsh-purge": "https://github.com/evilevil/dsh-purge-021rc2/releases/download/v1.1.72-dsh021rc2.4/dsh-purge-1.1.72-dsh021rc2.4.tgz"
+```powershell
+node .\node_modules\dsh-purge\scripts\ensure-profile-bundle.mjs
 ```
 
-## 装完怎么用
+然后完全退出并重开 DSH，在界面找到 **dsh-purge** 入口，检查“清洗”状态。只有存在待应用补丁时才执行“应用”，完成后按提示重启。旧版 `evilevil/dsh-purge-021rc2` 的 `.4` 包和安装链接不对应本分支当前版本。
 
-1. 完全退出并重开 DSH（补丁改的是已加载的 JS，不重启不生效）；
-2. 左侧栏 **Purge** → 状态页 → **应用**；
-3. 成功会自动重启；重启后新开一轮对话，注入才进当前会话；
-4. 面板应显示 **69 个补丁行 / 0 pending**，`#40 / #85 / #86 / #87–#92` 全绿。
+## 红队演练台使用顺序
 
-想确认真的注入了：随便问一句「你是谁」，回答应该来自 `~/.dsh/prompt-inject.md` 的人格，而不是官方自我介绍。
+1. 在“环境适配”页检查本机或 Kali SSH 主机、工具路径和可选凭据。缺失的工具应安装到实际执行命令的环境中。
+2. 新会话选择已注册的“红队模式”预设，先运行 `redteam_preflight`，再通过 `redteam_engagement_open` 建立并绑定授权目标。
+3. 将资产、漏洞、原始请求、步骤、结果、截图和得分及时落库；报告依赖这些记录，不能从聊天文本自动补齐证据。
+4. 回演练台刷新，检查资产、待测状态、证据和得分。漏洞需要准确的验证状态与证据；报告只呈现满足当前规则的成果。
+5. 需要交付时导出报告：
 
-## 验证
-
-仓库自带三组离线测试，不依赖网络：
-
-```sh
-node test/identity.test.mjs   # 5 项：{{cwd}} 能力探测与降级
-node test/patches.test.mjs    # 5 项：#40 命中 0.2.1 形状、#86 steer、#119/#127 静态断言
-node test/sandbox-apply.mjs   # 把宿主目标文件复制到 /tmp 跑全量 apply
+```powershell
+node .\node_modules\dsh-purge\scripts\export-engagement-report.mjs --engagement "your-engagement-id" --out ".\report-output"
 ```
 
-真机结果（macOS / dsh 0.2.1-rc.2 / web profile）：
+导出命令从 DSH Desktop profile 目录执行；将 `your-engagement-id` 换成演练台中的目标标识。报告所引用的截图会复制到输出目录。
 
+## 验证范围
+
+仓库包含提示词、补丁、安装回归、红队环境、远端连接及上游功能回归测试：
+
+```powershell
+$tests = Get-ChildItem .\test -Filter '*.test.mjs' | Select-Object -ExpandProperty FullName
+node --test $tests
 ```
-应用前：59/86 applied，11 pending，#40 skipped
-应用后：70/86 applied，0 pending，#40 / #85 / #86 / #87–#92 applied
-hostCleanMarkersPresent === true
-hostPromptKeepsInject === true
-```
 
-## 与上游的关系
+需要验证宿主补丁锚点时，将 `PURGE_HOST` 指向当前安装的宿主源码路径，并使用 `test/sandbox-apply.mjs` 在隔离副本中试应用。此前在 Windows Desktop / DSH `0.2.1-rc.2` 上，六组测试通过，隔离副本应用了 71/72 个补丁行，1 项跳过；补丁数和状态会随宿主版本变化。
 
-- 代码基座：`YuJunZhiXue/dsh-purge` master `1.1.72`（MIT）
-- 原作者：**小杨 / [YuJunZhiXue](https://github.com/YuJunZhiXue/dsh-purge)**
-- 本仓库：社区适配分支，只做 0.2.1-rc.2 兼容修复，不改变产品行为与提示词内容
-- 上游原始 README 保留在 [`upstream-README.md`](upstream-README.md)、[`upstream-README.zh-CN.md`](upstream-README.zh-CN.md)、[`upstream-README.en.md`](upstream-README.en.md)
-- 依照上游《署名要求》：**借用名称、思路、代码或提示词必须署名并写明来源仓库** —— 本仓库保留 MIT 许可证、原作者版权声明，并在 README 与本说明中明确标注来源。二次分发请同样保留。
+Kali SSH 连接和环境检查已验证，但外部工具、FOFA/VPS 配置及完整红队任务仍取决于使用者的环境；上述测试结果不等于一次完整演练已通过。
 
-## 已知限制
+## 与原作者版本的关系
 
-- 只验证了 **web profile + 官方桌面 0.2.1-rc.2 的代码形状**；0.2.0-rc.2 逻辑上兼容但未逐项回归。
-- 上游停止维护意味着 dsh 再改宿主结构时，补丁锚点需要重新对齐；欢迎 issue / PR。
-- `shim 目录: 未定位` 在 npx 安装下是正常现象（没有全局 `dsh` 启动器），不影响功能。
-- 本仓库不提供官方背书，使用风险自负；破甲类插件请只在自有环境做安全研究。
+- 代码基座为原作者的 `1.1.72` 早期源码；当前公开原版仍由原作者继续维护。
+- 本分支除兼容修复外，还保留并扩展了红队演练、证据记录、报告及 Windows/Kali 适配，功能和使用范围可能与当前原版不同。
+- 历史原版说明保留在 [upstream-README.md](upstream-README.md)、[upstream-README.zh-CN.md](upstream-README.zh-CN.md) 和 [upstream-README.en.md](upstream-README.en.md)。
+- 借用原作者的名称、思路、代码和提示词时，请保留原作者署名与来源链接；二次分发也应保留相应许可文件。
 
-## 维护与发布
+## 维护
 
-上游停更后，这个仓库自己发版，流程很短：
-
-1. 改代码，同步改 `package.json` 的 `version`（例如 `1.1.72-dsh021rc2.4`）与 `CHANGELOG.md`；
-2. 跑一遍离线测试：
-   ```sh
-   node test/identity.test.mjs && node test/patches.test.mjs
-   ```
-3. 打 tag 推上去，CI 会自动 `npm pack` + 生成 `SHA256SUMS.txt` 并发 Release：
-   ```sh
-   git tag v1.1.72-dsh021rc2.4 && git push origin v1.1.72-dsh021rc2.4
-   ```
-4. 本地升级：`PURGE_VERSION=<新版本> sh scripts/install.sh`
-
-宿主再升级导致补丁锚点漂移时，优先跑 `test/sandbox-apply.mjs` 看是哪几条 pattern 不命中，再对着真实的 `@deepseek-ai/*` 源码补 pattern。
+发布新包前，应更新版本号和 [CHANGELOG.md](CHANGELOG.md)，运行仓库测试，在目标宿主版本上检查补丁锚点与插件入口，再打包验证。仓库的 `origin` 可能指向历史社区 fork；推送前先核对远端地址，不要照搬旧版 README 的推送命令。
 
 ## License
 
-MIT。原始版权 `Copyright (c) 2026 小杨`，本仓库修改部分 `Copyright (c) 2026 evilevil`。
+MIT。原始版权 `Copyright (c) 2026 小杨`；本分支保留原有版权与许可证声明。
