@@ -829,6 +829,21 @@
 - Rewind on 0.1.7 created the new session and left the UI on the old chat, so the click looked dead. 0.1.7 has no `sessions.open`. The button now opens the new session with `uiWorkspace.openSession` and puts the previous user line back in the composer. A failure shows on the button.
 - The README sponsor block is now a non-profit notice: no commercial resale and no gray-market profit; technical reference only.
 
+# 1.1.72-dsh021rc2.9（本地打包）
+
+- Kali 用户目录已配置 ProjectDiscovery 官方 subfinder 2.16.0、dnsx 1.3.1、naabu 2.6.1、httpx 1.12.0（发布方校验和一致）。远端体检优先报告技能实际使用的 httpx 工具箱路径，避免系统旧版 `httpx-toolkit` 抢先命中。
+
+# 1.1.72-dsh021rc2.8（本地过渡包）
+
+- 远端 Kali 预检只认来宾侧的 FOFA/VPS 配置；演练台远端模式禁用本机路径输入，避免把 Windows 配置误当作已传给 Kali。
+- SSH 连接失败时明确显示远端不可用，不回退展示 Windows 本机工具路径。`.7` 为本地过渡包，已由本版替代。
+
+# 1.1.72-dsh021rc2.7（本地过渡包）
+
+- Windows DSH 可选用已配置的 `dsh-ssh` 主机作为 Kali 运行环境；演练台环境适配显示 SSH 实测的远端工具，发送前门禁按远端 Kali 状态判断。
+- `redteam_preflight` 区分 Windows 宿主与 Kali 来宾：远端工具路径和 FOFA/VPS 配置只按 Kali 检查，避免把 Windows 本机缺失误报为远端缺失或把宿主密钥误报为来宾可用。
+- Kali 虚拟机通过 SSH 主机密钥与专用公钥连接；本地 `.6` 安装包与原虚拟机保留作回退。
+
 # 1.1.72-dsh021rc2.6
 
 - 修复 0.2.1 桌面 profile 中 dsh-purge 本体未注册：`profile.bundles` 只提供补丁层，须在 `cordis.patch.yml` 显式 `insert` 本体。`.5` 仅运行 3 个演练台组件，清洗界面因此消失。
