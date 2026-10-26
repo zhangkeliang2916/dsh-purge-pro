@@ -1,6 +1,6 @@
 {
   "name": "dsh-purge",
-  "version": "1.1.72-dsh021rc2.4",
+  "version": "1.1.72-dsh021rc2.10",
   "description": "DeepSeek Harness 破甲（社区维护版）：以 1.1.72 为基座，适配 DSH 0.2.1-rc.2 —— 修 {{cwd}} 变量崩溃、#40 补丁锚点、#119 未 await、#127 hostFs.closeSync、红队预设 toolFilter 注册失败。",
   "type": "module",
   "main": "lib/index.js",
@@ -36,7 +36,8 @@
   ],
   "scripts": {
     "embed-prompt": "node scripts/embed-default-prompt.mjs",
-    "build:client": "node scripts/build-client.mjs"
+    "build:client": "node scripts/build-client.mjs",
+    "postinstall": "node scripts/ensure-profile-bundle.mjs"
   },
   "license": "MIT",
   "keywords": [
@@ -78,7 +79,7 @@
     },
     "install": {
       "preferred": "tarball",
-      "tarball": "https://github.com/evilevil/dsh-purge-021rc2/releases/download/v1.1.72-dsh021rc2.4/dsh-purge-1.1.72-dsh021rc2.4.tgz",
+      "tarball": "https://github.com/evilevil/dsh-purge-021rc2/releases/download/v1.1.72-dsh021rc2.9/dsh-purge-1.1.72-dsh021rc2.9.tgz",
       "zip": "https://github.com/evilevil/dsh-purge-021rc2/archive/refs/heads/main.zip",
       "git": "https://github.com/evilevil/dsh-purge-021rc2.git"
     }

@@ -1,4 +1,13 @@
-# dsh-purge `1.1.72-dsh021rc2.4` — DSH 0.2.1-rc.2 适配版
+# dsh-purge — DSH 0.2.1-rc.2 适配版
+
+## 1.1.72-dsh021rc2.10
+
+- 修复 `hostFs` 缺少 `readSync` 导致文本 `dsh.cmd` 被误判成二进制、shim 注入与状态检测跳过；文件描述符操作不再按路径做 asar 探测。
+- `/purge`、`/rules`、`/skills`、`/rewind` 逐条注册；撞名时尝试备用命令，不再阻断后续工具初始化。
+- 主插件本体改由 profile 的 `postinstall` 和演练台启动自愈补入；包内 overlay 只更新已有本体配置，避免重复入队。保留原有红队 Skill、知识库与 Windows/Kali SSH 适配。
+- 新增安装、命令冲突和 shim 回归测试；在本机 DSH `0.2.1-rc.2` 宿主样本上跑补丁锚点测试与隔离应用烟测。
+
+---
 
 ## 1.1.72-dsh021rc2.4
 
