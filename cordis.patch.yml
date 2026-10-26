@@ -32,29 +32,29 @@
     # 工作目录后缀由 lib/identity.js 在组装期按宿主能力决定（变量 or 静态文案）。
     personaSuffix: ""
 
-- insert:
-    # 0.2.1 桌面 profile 的 bundles 只提供补丁层，本体必须显式插入。
-    - id: dsh-purge
-      name: 'dsh-purge'
-      inject: [systemPrompt, tools]
-      config:
-        enabled: true
-        autoApplyOnStart: false
-        autoUpdateOnStart: false
-        autoRevertOnMissing: false
-        injectOnce: false
-        stripMnemon: true
-        verbose: false
-        postPrompt: ""
-        postPromptOrder: 5100
-        autoRetry: true
-        retryMax: 3
-        autoContinue: false
-        continueMax: 3
-        continueText: "继续"
-        capabilityProtocol: true
-        hooksDenyBypass: true
+# 本体由 postinstall 写入用户 profile；此处只更新已入队条目的配置。
+- id: dsh-purge
+  name: dsh-purge
+  inject: [systemPrompt, tools]
+  config:
+    enabled: true
+    autoApplyOnStart: false
+    autoUpdateOnStart: false
+    autoRevertOnMissing: false
+    injectOnce: false
+    stripMnemon: true
+    verbose: false
+    postPrompt: ""
+    postPromptOrder: 5100
+    autoRetry: true
+    retryMax: 3
+    autoContinue: false
+    continueMax: 3
+    continueText: "继续"
+    capabilityProtocol: true
+    hooksDenyBypass: true
 
+- insert:
     # 演练台：预设 + 技能落地（本插件 lib/redteam）
     - id: dsh-purge-redteam
       name: dsh-purge/redteam
