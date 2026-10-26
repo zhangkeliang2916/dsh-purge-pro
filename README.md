@@ -1,8 +1,6 @@
-# dsh-purge · DSH 0.2.1-rc.2 适配版
-
-> **上游已经被请喝茶，这个仓库接着把它跑在 DeepSeek Harness 0.2.1-rc.2 上。**
->
-> 原项目 [YuJunZhiXue/dsh-purge](https://github.com/YuJunZhiXue/dsh-purge) 在 2026-10 挂出「暂时停更」：不发新版、不处理 issue/PR、新版 dsh 也不保证跟上。最后一个正式版是 `v1.1.71`，master 上的 `1.1.72` 从未发版。
+> 关于 dsh-purge Pro
+dsh-purge Pro 基于原作者 YuJunZhiXue/dsh-purge 的早期源码 fork，由社区独立维护。原作者后续公开版收紧了红队任务的使用范围，不再随包提供红队 Skill 和知识库。本分支保留了早期功能，并继续完善 DSH 0.2.1-rc.2 兼容性、Windows 桌面安装、Kali SSH 环境适配及证据与报告流程。
+这是独立维护的 Pro 分支，感谢原作者的基础工作。原版仍在更新；后续修复会核对后按需移植。
 >
 > 本仓库以 **1.1.72（master）** 为基座，把 0.2.1-rc.2 上必崩的几处修掉，做成可直接安装的版本。**上游恢复维护后，请优先回到上游。**
 
