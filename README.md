@@ -1,11 +1,11 @@
 # dsh-purge Pro
 
-基于 [YuJunZhiXue/dsh-purge](https://github.com/YuJunZhiXue/dsh-purge) 早期源码的独立维护分支。感谢原作者小杨的基础工作。本分支面向 DSH `0.2.1-rc.2`，继续维护清洗补丁、红队演练台、Windows Desktop 安装和 Kali SSH 环境适配，并按需移植原版后续改进。
+基于 [YuJunZhiXue/dsh-purge](https://github.com/YuJunZhiXue/dsh-purge) 早期源码的独立维护分支。感谢原作者小杨的基础工作。本分支面向 DSH `0.2.2-rc.1`，继续维护清洗补丁、红队演练台、Windows Desktop 安装和 Kali SSH 环境适配，并按需移植原版后续改进。
 
 | 项目 | 当前状态 |
 | --- | --- |
-| 插件版本 | `1.1.72-dsh021rc2.10` |
-| 适配宿主 | DSH `0.2.1-rc.2` |
+| 插件版本 | `1.1.72-dsh022rc1.1` |
+| 适配宿主 | DSH `0.2.2-rc.1` |
 | 主要验证环境 | Windows Desktop profile；Kali SSH 环境适配已验证 |
 | 许可 | MIT；保留原作者署名及许可证 |
 
@@ -13,7 +13,7 @@
 
 ## 功能与特点
 
-- **清洗与宿主兼容**：修复 DSH `0.2.1-rc.2` 的提示词变量、补丁锚点、桌面重启及备份问题；面板可查看补丁状态并执行应用、还原。
+- **清洗与宿主兼容**：适配 DSH `0.2.2-rc.1` 的提示词组装、补丁锚点与模块路径；面板可查看补丁状态并执行应用、还原。
 - **红队演练台**：包含资产、端口、指纹、漏洞、当前测试、发现时间、得分目标、报告等视图；提供 64 个 `redteam_*` 工具声明及 23 份红队 Skill 文档。POC/EXP 知识库可检索和回填。
 - **证据链与报告**：记录原始 HTTP 请求、攻击步骤、工具结果、截图和得分；报告可按目标导出，截图随报告一起复制并使用相对路径引用。
 - **Windows + Kali SSH**：Windows Desktop 可登记远端 Kali 主机，环境适配页检查工具与配置。Linux 工具仍需安装在 Kali，远端命令经 SSH 执行；仅连接 Kali 不代表扫描流程已验证。
@@ -21,7 +21,11 @@
 
 红队演练台是记录和协调工具，不会因为安装插件就自动具备全部外部工具、FOFA 凭据或 VPS。使用前应先完成“演练台 → 环境适配”的检查，再在有授权的靶场中建立目标和会话。
 
-## DSH 0.2.1-rc.2 适配
+## DSH 0.2.2-rc.1 适配
+
+DSH 新版把宿主重新封装进 `app.asar`，并调整了提示词组装、agent loop 的首次组装位置和几个工具模块路径。本版保留工具声明与必需上下文，恢复插件注入，并让原有补丁命中新位置。隔离宿主烟测应用 66 项、跳过 1 项旧版遗留清理，改动文件均通过 JS 语法检查。旧版安装副本不能直接视为新版兼容。
+
+## DSH 0.2.1-rc.2 历史适配
 
 这版宿主的 agent-loop 不再注册 `cwd` 提示词变量。旧版插件仍写入 `{{cwd}}`，会在模型请求前报 `unknown prompt variable "[cwd]"`，即使补丁面板显示正常。本分支在 `lib/identity.js` 中探测变量能力并降级为静态文案，同时修复了下列问题：
 
@@ -45,8 +49,8 @@
 npm pack
 $archive = Join-Path $env:USERPROFILE '.dsh\plugins\archives'
 New-Item -ItemType Directory -Force $archive | Out-Null
-Copy-Item .\dsh-purge-1.1.72-dsh021rc2.10.tgz $archive -Force
-$packagePath = (Join-Path $archive 'dsh-purge-1.1.72-dsh021rc2.10.tgz').Replace('\', '/')
+Copy-Item .\dsh-purge-1.1.72-dsh022rc1.1.tgz $archive -Force
+$packagePath = (Join-Path $archive 'dsh-purge-1.1.72-dsh022rc1.1.tgz').Replace('\', '/')
 
 # 切换到 DSH Desktop profile 后安装
 Set-Location (Join-Path $env:USERPROFILE '.dsh\profiles\desktop')
@@ -84,7 +88,7 @@ $tests = Get-ChildItem .\test -Filter '*.test.mjs' | Select-Object -ExpandProper
 node --test $tests
 ```
 
-需要验证宿主补丁锚点时，将 `PURGE_HOST` 指向当前安装的宿主源码路径，并使用 `test/sandbox-apply.mjs` 在隔离副本中试应用。此前在 Windows Desktop / DSH `0.2.1-rc.2` 上，六组测试通过，隔离副本应用了 71/72 个补丁行，1 项跳过；补丁数和状态会随宿主版本变化。
+需要验证宿主补丁锚点时，先把当前 `app.asar` 解到隔离目录，再将 `PURGE_HOST` 指向其中的 `dsh/node_modules/@deepseek-ai`，使用 `test/sandbox-apply.mjs` 在另一份隔离副本中试应用。Windows Desktop / DSH `0.2.2-rc.1` 的六组测试通过，隔离副本应用了 66 项补丁、跳过 1 项旧版遗留清理；补丁数和状态会随宿主版本变化。
 
 Kali SSH 连接和环境检查已验证，但外部工具、FOFA/VPS 配置及完整红队任务仍取决于使用者的环境；上述测试结果不等于一次完整演练已通过。
 

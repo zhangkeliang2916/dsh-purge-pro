@@ -46,6 +46,13 @@ console.log(`  applied: ${report.filter((r) => r.status === "applied").length}`)
 const statusMap = (after && after.patch_status) || after;
 const p40 = statusMap[40];
 assert.equal(p40, "applied", `patch 40 is ${p40}`);
+const hostPackage = JSON.parse(fs.readFileSync(path.join(HOST, "dsh-system-prompt", "package.json"), "utf8"));
+if (hostPackage.version.startsWith("0.2.2-rc.1")) {
+  for (const id of [14, 40, 54, 60, 62, 67, 74]) {
+    assert.equal(statusMap[id], "applied", `0.2.2-rc.1 patch ${id} is ${statusMap[id]}`);
+  }
+  assert.equal(statusMap[88], "skipped", "fresh host has no legacy hung prompt to remove");
+}
 
 
 // Every file we actually changed must still parse.

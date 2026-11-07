@@ -1,7 +1,7 @@
 {
   "name": "dsh-purge",
-  "version": "1.1.72-dsh021rc2.10",
-  "description": "DeepSeek Harness 破甲（社区维护版）：以 1.1.72 为基座，适配 DSH 0.2.1-rc.2 —— 修 {{cwd}} 变量崩溃、#40 补丁锚点、#119 未 await、#127 hostFs.closeSync、红队预设 toolFilter 注册失败。",
+  "version": "1.1.72-dsh022rc1.1",
+  "description": "DeepSeek Harness 破甲 Pro：以 1.1.72 为基座，适配 DSH 0.2.2-rc.1，保留红队演练台、随包 Skill、知识库及 Windows/Kali SSH 适配。",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -57,11 +57,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/evilevil/dsh-purge-021rc2.git"
+    "url": "git+https://github.com/zhangkeliang2916/dsh-purge-pro.git"
   },
-  "homepage": "https://github.com/evilevil/dsh-purge-021rc2#readme",
+  "homepage": "https://github.com/zhangkeliang2916/dsh-purge-pro#readme",
   "bugs": {
-    "url": "https://github.com/evilevil/dsh-purge-021rc2/issues"
+    "url": "https://github.com/zhangkeliang2916/dsh-purge-pro/issues"
   },
   "dsh": {
     "bundle": {
@@ -78,10 +78,9 @@
       ]
     },
     "install": {
-      "preferred": "tarball",
-      "tarball": "https://github.com/evilevil/dsh-purge-021rc2/releases/download/v1.1.72-dsh021rc2.9/dsh-purge-1.1.72-dsh021rc2.9.tgz",
-      "zip": "https://github.com/evilevil/dsh-purge-021rc2/archive/refs/heads/main.zip",
-      "git": "https://github.com/evilevil/dsh-purge-021rc2.git"
+      "preferred": "zip",
+      "zip": "https://github.com/zhangkeliang2916/dsh-purge-pro/archive/refs/heads/dsh-desktop-maintenance-20261028.zip",
+      "git": "https://github.com/zhangkeliang2916/dsh-purge-pro.git"
     }
   },
   "publishConfig": {
@@ -93,7 +92,7 @@
   "engines": {
     "node": ">=18"
   },
-  "dshTarget": "0.2.1-rc.2",
+  "dshTarget": "0.2.2-rc.1",
   "contributors": [
     {
       "name": "小杨 (YuJunZhiXue)",

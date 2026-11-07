@@ -1,5 +1,5 @@
-// Patch-level tests for the 0.2.1-rc.2 adaptation.
-// 1) #40 must match the 0.2.1 system-prompt shape and stay valid JS.
+// Patch-level tests for supported DSH desktop hosts.
+// 1) #40 must match the current system-prompt shape and stay valid JS.
 // 2) #86 must rewrite the queue-steer path to agent.steer (issue #121).
 // 3) #119 / #127 static guards.
 import assert from "node:assert/strict";
@@ -44,7 +44,7 @@ function assertParses(text, label) {
   if (label) console.log(`  · ${label} parses`);
 }
 
-await check("#40 matches 0.2.1 system-prompt and yields valid JS", () => {
+await check("#40 keeps injected sections in the current system-prompt", () => {
   if (!HAS_HOST) { console.log("  · skip (no DSH host)"); return; }
   const fp = path.join(HOST, "dsh-system-prompt/lib/index.js");
   // 用官方快照当"改前"样本；没有快照才退回当前文件。
@@ -53,14 +53,37 @@ await check("#40 matches 0.2.1 system-prompt and yields valid JS", () => {
   const source = fs.readFileSync(base, "utf8");
   const p = patch(40);
   const out = core.applyReplacementsToText(source, p, fp);
-  assert.equal(out.changed, true, "patch 40 did not match 0.2.1 host");
+  assert.equal(out.changed, true, "patch 40 did not match the host");
   assert.equal(out.text.includes("transformed.sections : [completeSection]"), false);
   assert.match(out.text, /fold-complete inject first/);
   assert.match(out.text, /requiredContexts\.has\(entry\.name\)/);
+  if (source.includes("const tools = orderTools(")) {
+    assert.match(out.text, /return \{ \.\.\.transformed, tools, sections: \[\.\.\.dshPurgeSections, \.\.\.dshPurgeRest\] \}/);
+    assert.match(out.text, /\.\.\.transformed,\s+tools,\s+sections:/);
+  }
   assertParses(out.text, "patched system-prompt");
 
   const again = core.applyReplacementsToText(out.text, p, fp);
   assert.equal(again.changed, false, "patch 40 is not idempotent");
+});
+
+await check("0.2.2 prompt preparation and guards match their new locations", () => {
+  if (!HAS_HOST) return;
+  const sandboxFile = path.join(HOST, "dsh-sandbox/lib/index.js");
+  const loopFile = path.join(HOST, "dsh-agent-loop/lib/index.js");
+  const sandbox = fs.readFileSync(pristine(sandboxFile), "utf8");
+  const loop = fs.readFileSync(pristine(loopFile), "utf8");
+  if (!loop.includes("modelSelection: selection")) return;
+  const p14 = core.applyReplacementsToText(sandbox, patch(14), sandboxFile);
+  assert.equal(p14.changed, true, "#14 missed the new escalation call");
+  assertParses(p14.text, "patched sandbox");
+  const p74 = core.applyReplacementsToText(loop, patch(74), loopFile);
+  assert.equal(p74.changed, true, "#74 missed the new pre-step assemble");
+  assert.match(p74.text, /const assembly = await dshPurgeAssemble\.assemble/);
+  assert.equal(core.applyReplacementsToText(p74.text, patch(74), loopFile).changed, false);
+  const p67 = core.applyReplacementsToText(p74.text, patch(67), loopFile);
+  assert.equal(p67.changed, true, "#67 missed the moved message guards");
+  assertParses(p67.text, "patched agent loop");
 });
 
 await check("#86 rewrites queue steer to agent.steer (#121)", () => {
