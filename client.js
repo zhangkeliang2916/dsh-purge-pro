@@ -955,7 +955,7 @@ body[data-ds-dark-theme] .dshp-restart-card .dshp-btn-primary,body[data-ds-dark-
 .dshp-dock[data-open="0"]{display:none}
 .dshp-launch{position:fixed;right:16px;bottom:16px;z-index:10040;appearance:none;display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border:1px solid color-mix(in srgb,var(--dsw-alias-brand-primary,#6dbf8c) 55%,transparent);border-radius:999px;background:color-mix(in srgb,var(--dsw-alias-bg-layer-1,#1c1c1c) 72%,transparent);color:var(--dsw-alias-label-primary,#f2f2f2);cursor:pointer;font:13px/1 inherit;box-shadow:0 8px 22px color-mix(in srgb,#000 28%,transparent);pointer-events:auto}
 .dshp-launch:hover{border-color:var(--dsw-alias-brand-primary,#6dbf8c);background:color-mix(in srgb,var(--dsw-alias-brand-primary,#6dbf8c) 18%,transparent)}
-.dshp-launch[data-open="1"],.dshp-launch[data-hide="1"]{display:none}
+.dshp-launch[data-open="1"]{display:none}
 .dshp-dock-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid color-mix(in srgb,var(--dsw-alias-border-l1,var(--dshp-line,#555)) 55%,transparent);background:transparent;cursor:grab;user-select:none;touch-action:none;color:var(--dsw-alias-label-primary,var(--dshp-ink,#f2f2f2));border-radius:12px 12px 0 0}
 .dshp-dock-head:active{cursor:grabbing}
 .dshp-dock-head b{font-size:14px;font-weight:600;color:inherit;text-shadow:0 1px 0 color-mix(in srgb,#000 18%,transparent)}
@@ -8549,42 +8549,14 @@ body[data-ds-dark-theme] .dshp-rewind-item span{color:var(--dsw-alias-label-tert
 			);
 		}
 
-		function hasInlinePurgeEntry() {
-			if (typeof document === "undefined") return false;
-			if (document.querySelector("[data-testid='dsh-purge-hero-chip'], [data-testid='dsh-purge-tab-chip']")) return true;
-			const nodes = document.querySelectorAll("button, [role='tab'], [role='button'], [class*='chip']");
-			for (let i = 0; i < nodes.length; i += 1) {
-				const el = nodes[i];
-				if (!el || el.classList.contains("dshp-launch")) continue;
-				if (el.closest && el.closest(".dshp-dock, .dshp-launch")) continue;
-				if (String(el.textContent || "").trim() === "dsh-purge") return true;
-			}
-			return false;
-		}
-
 		function PurgeLauncher() {
 			const t = useT();
 			const st = useDock();
-			const [hide, setHide] = useState(hasInlinePurgeEntry);
-			useEffect(() => {
-				const sync = () => setHide(hasInlinePurgeEntry());
-				sync();
-				const obs = typeof MutationObserver !== "undefined"
-					? new MutationObserver(sync)
-					: null;
-				if (obs && document.body) obs.observe(document.body, { childList: true, subtree: true });
-				const iv = setInterval(sync, 800);
-				return () => {
-					if (obs) obs.disconnect();
-					clearInterval(iv);
-				};
-			}, []);
-			if (st.open || hide) return null;
+			if (st.open) return null;
 			return h("button", {
 				type: "button",
 				className: "dshp-launch",
 				"data-open": "0",
-				"data-hide": "0",
 				"data-testid": "dsh-purge-launch",
 				title: t("dock.newSession"),
 				onClick: () => toggleDock(),

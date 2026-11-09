@@ -4,7 +4,7 @@
 
 | 项目 | 当前状态 |
 | --- | --- |
-| 插件版本 | `1.1.72-dsh022rc1.1` |
+| 插件版本 | `1.1.72-dsh022rc1.2` |
 | 适配宿主 | DSH `0.2.2-rc.1` |
 | 主要验证环境 | Windows Desktop profile；Kali SSH 环境适配已验证 |
 | 许可 | MIT；保留原作者署名及许可证 |
@@ -49,8 +49,8 @@ DSH 新版把宿主重新封装进 `app.asar`，并调整了提示词组装、ag
 npm pack
 $archive = Join-Path $env:USERPROFILE '.dsh\plugins\archives'
 New-Item -ItemType Directory -Force $archive | Out-Null
-Copy-Item .\dsh-purge-1.1.72-dsh022rc1.1.tgz $archive -Force
-$packagePath = (Join-Path $archive 'dsh-purge-1.1.72-dsh022rc1.1.tgz').Replace('\', '/')
+Copy-Item .\dsh-purge-1.1.72-dsh022rc1.2.tgz $archive -Force
+$packagePath = (Join-Path $archive 'dsh-purge-1.1.72-dsh022rc1.2.tgz').Replace('\', '/')
 
 # 切换到 DSH Desktop profile 后安装
 Set-Location (Join-Path $env:USERPROFILE '.dsh\profiles\desktop')

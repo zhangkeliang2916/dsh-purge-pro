@@ -1,6 +1,6 @@
 {
   "name": "dsh-purge",
-  "version": "1.1.72-dsh022rc1.1",
+  "version": "1.1.72-dsh022rc1.2",
   "description": "DeepSeek Harness 破甲 Pro：以 1.1.72 为基座，适配 DSH 0.2.2-rc.1，保留红队演练台、随包 Skill、知识库及 Windows/Kali SSH 适配。",
   "type": "module",
   "main": "lib/index.js",
